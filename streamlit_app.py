@@ -1,34 +1,39 @@
 import streamlit as st
-import dxfgrabber
-import matplotlib.pyplot as plt
+import ezdxf
+import io
 
-st.set_page_config(page_title="DXF Preview", layout="wide")
 st.title("📐 DXF Preview Tool")
+st.write("Upload a DXF file and I will display its basic contents.")
 
 uploaded_file = st.file_uploader("Upload DXF file", type=["dxf"])
 
 if uploaded_file:
     try:
-        # Read the DXF file (works for ASCII + binary DXF)
-        dxf = dxfgrabber.read(uploaded_file)
+        # ALWAYS use getvalue() → returns bytes
+        data = uploaded_file.getvalue()
 
-        # Extract LINE entities for preview
-        lines = [e for e in dxf.entities if e.dxftype == "LINE"]
+        # Feed bytes into BytesIO
+        stream = io.BytesIO(data)
 
-        st.success(f"DXF Loaded Successfully — {len(lines)} line entities found")
+        # Load DXF from stream
+        doc = ezdxf.read(stream=stream)
 
-        # Plot
-        fig, ax = plt.subplots()
-        for line in lines:
-            x = [line.start[0], line.end[0]]
-            y = [line.start[1], line.end[1]]
-            ax.plot(x, y, color="black")
+        # Access modelspace
+        msp = doc.modelspace()
 
-        ax.set_aspect("equal", "box")
-        ax.set_title("DXF Preview")
-        ax.invert_yaxis()  # DXF coordinate system fix
+        # Count LINE entities
+        line_count = len(msp.query("LINE"))
 
-        st.pyplot(fig)
+        st.success(f"DXF loaded successfully! Total LINE entities: {line_count}")
+
+        # Show preview of first 20 entities
+        preview = []
+        for e in msp:
+            preview.append(str(e))
+            if len(preview) >= 20:
+                break
+
+        st.code("\n".join(preview))
 
     except Exception as e:
-        st.error(f"Failed to read DXF: {e}")
+        st.error(f"Failed to read DXF: {str(e)}")

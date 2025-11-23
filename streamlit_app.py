@@ -9,15 +9,16 @@ uploaded_file = st.file_uploader("Upload DXF file", type=["dxf"])
 
 if uploaded_file is not None:
     try:
-        # Read uploaded file as bytes
-        data = uploaded_file.read()
+        # MUST READ AS BYTES
+        data = uploaded_file.getvalue()
+
+        # Convert to byte-stream for ezdxf
         stream = io.BytesIO(data)
 
-        # Load DXF document (works for R12, ASCII, Binary)
+        # ezdxf MUST read from BytesIO
         doc = ezdxf.read(stream)
         msp = doc.modelspace()
 
-        # Count LINE entities
         line_count = len(msp.query("LINE"))
 
         st.success(f"Total LINE entities: **{line_count}**")

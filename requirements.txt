@@ -1,2 +1,2 @@
 streamlit
-ezdxf
+ezdxf==1.1.4

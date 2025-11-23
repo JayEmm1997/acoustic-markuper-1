@@ -9,14 +9,14 @@ uploaded_file = st.file_uploader("Upload DXF file", type=["dxf"])
 
 if uploaded_file:
     try:
-        # ALWAYS use getvalue() → returns bytes
+        # Read file as raw bytes
         data = uploaded_file.getvalue()
 
-        # Feed bytes into BytesIO
+        # Convert bytes to stream
         stream = io.BytesIO(data)
 
-        # Load DXF from stream
-        doc = ezdxf.read(stream=stream)
+        # Load DXF (correct call)
+        doc = ezdxf.read(stream)
 
         # Access modelspace
         msp = doc.modelspace()
@@ -26,10 +26,10 @@ if uploaded_file:
 
         st.success(f"DXF loaded successfully! Total LINE entities: {line_count}")
 
-        # Show preview of first 20 entities
+        # Preview first 20 entities
         preview = []
-        for e in msp:
-            preview.append(str(e))
+        for entity in msp:
+            preview.append(str(entity))
             if len(preview) >= 20:
                 break
 

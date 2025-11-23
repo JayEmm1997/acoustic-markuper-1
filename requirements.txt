@@ -1,2 +1,3 @@
 streamlit
-ezdxf==1.1.4
+dxfgrabber
+matplotlib

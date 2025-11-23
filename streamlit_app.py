@@ -2,23 +2,19 @@ import streamlit as st
 import ezdxf
 import io
 
-st.title("📐 DXF Line Counter")
+st.title("📏 DXF Line Counter")
 st.write("Upload a DXF file and I will count all LINE entities inside it.")
 
 uploaded_file = st.file_uploader("Upload DXF file", type=["dxf"])
 
 if uploaded_file is not None:
     try:
-        # Read file as bytes
-        raw_bytes = uploaded_file.read()
+        # Read uploaded file as bytes
+        data = uploaded_file.read()
+        stream = io.BytesIO(data)
 
-        # DXF is a TEXT-BASED format → decode to string
-        text_data = raw_bytes.decode("utf-8", errors="ignore")
-
-        # Load DXF from decoded text
-        doc = ezdxf.readtext(text_data)
-
-        # Access modelspace
+        # Load DXF document (works for R12, ASCII, Binary)
+        doc = ezdxf.read(stream)
         msp = doc.modelspace()
 
         # Count LINE entities
